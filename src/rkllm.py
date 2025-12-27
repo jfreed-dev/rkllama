@@ -13,7 +13,7 @@ class RKLLM(object):
     """
 
     def __init__(self, model_path, lora_model_path=None, prompt_cache_path=None,
-                 max_context_len=4096, max_new_tokens=-1, temperature=0.8,
+                 max_context_len=4096, max_new_tokens=2048, temperature=0.8,
                  top_k=1, top_p=0.9, repeat_penalty=1.1):
         """
         Initialize RKLLM model.
@@ -23,7 +23,7 @@ class RKLLM(object):
             lora_model_path: Optional path to LoRA adapter
             prompt_cache_path: Optional path to prompt cache
             max_context_len: Maximum context length (default: 4096)
-            max_new_tokens: Maximum new tokens to generate (-1 for unlimited)
+            max_new_tokens: Maximum new tokens to generate (default: 2048)
             temperature: Sampling temperature (default: 0.8)
             top_k: Top-k sampling (default: 1)
             top_p: Top-p sampling (default: 0.9)
