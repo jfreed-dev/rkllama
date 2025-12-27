@@ -4,43 +4,59 @@ import os
 PROMPT_TEXT_PREFIX = "<|im_start|>system You are a helpful assistant. <|im_end|> <|im_start|>user"
 PROMPT_TEXT_POSTFIX = "<|im_end|><|im_start|>assistant"
 
-# Définir le chemin de la bibliothèque dynamique
+# Define the path to the dynamic library
 library_path = os.path.expanduser('~/RKLLAMA/lib/librkllmrt.so')
 rkllm_lib = ctypes.CDLL(library_path)
 
-# Définir les structures de la bibliothèque
+# Define the structures from the library
 RKLLM_Handle_t = ctypes.c_void_p
 userdata = ctypes.c_void_p(None)
 
+# LLMCallState enum - Updated for 1.2.3
 LLMCallState = ctypes.c_int
-LLMCallState.RKLLM_RUN_NORMAL   = 0
-LLMCallState.RKLLM_RUN_WAITING  = 1
-LLMCallState.RKLLM_RUN_FINISH   = 2
-LLMCallState.RKLLM_RUN_ERROR    = 3
-LLMCallState.RKLLM_RUN_GET_LAST_HIDDEN_LAYER = 4
+LLMCallState.RKLLM_RUN_NORMAL = 0
+LLMCallState.RKLLM_RUN_WAITING = 1
+LLMCallState.RKLLM_RUN_FINISH = 2
+LLMCallState.RKLLM_RUN_ERROR = 3
 
-RKLLMInputMode = ctypes.c_int
-RKLLMInputMode.RKLLM_INPUT_PROMPT      = 0
-RKLLMInputMode.RKLLM_INPUT_TOKEN       = 1
-RKLLMInputMode.RKLLM_INPUT_EMBED       = 2
-RKLLMInputMode.RKLLM_INPUT_MULTIMODAL  = 3
+# RKLLMInputType enum - Renamed from RKLLMInputMode in 1.2.3
+RKLLMInputType = ctypes.c_int
+RKLLMInputType.RKLLM_INPUT_PROMPT = 0
+RKLLMInputType.RKLLM_INPUT_TOKEN = 1
+RKLLMInputType.RKLLM_INPUT_EMBED = 2
+RKLLMInputType.RKLLM_INPUT_MULTIMODAL = 3
 
+# Keep old name for backward compatibility
+RKLLMInputMode = RKLLMInputType
+
+# RKLLMInferMode enum - Updated for 1.2.3
 RKLLMInferMode = ctypes.c_int
 RKLLMInferMode.RKLLM_INFER_GENERATE = 0
 RKLLMInferMode.RKLLM_INFER_GET_LAST_HIDDEN_LAYER = 1
+RKLLMInferMode.RKLLM_INFER_GET_LOGITS = 2
 
+
+# Updated for RKLLM 1.2.3
 class RKLLMExtendParam(ctypes.Structure):
     _fields_ = [
         ("base_domain_id", ctypes.c_int32),
-        ("reserved", ctypes.c_uint8 * 112)
+        ("embed_flash", ctypes.c_int8),
+        ("enabled_cpus_num", ctypes.c_int8),
+        ("enabled_cpus_mask", ctypes.c_uint32),
+        ("n_batch", ctypes.c_uint8),
+        ("use_cross_attn", ctypes.c_int8),
+        ("reserved", ctypes.c_uint8 * 104)
     ]
 
+
+# Updated for RKLLM 1.2.3
 class RKLLMParam(ctypes.Structure):
     _fields_ = [
         ("model_path", ctypes.c_char_p),
         ("max_context_len", ctypes.c_int32),
         ("max_new_tokens", ctypes.c_int32),
         ("top_k", ctypes.c_int32),
+        ("n_keep", ctypes.c_int32),  # New in 1.2.3
         ("top_p", ctypes.c_float),
         ("temperature", ctypes.c_float),
         ("repeat_penalty", ctypes.c_float),
@@ -55,7 +71,9 @@ class RKLLMParam(ctypes.Structure):
         ("img_end", ctypes.c_char_p),
         ("img_content", ctypes.c_char_p),
         ("extend_param", RKLLMExtendParam),
+        ("use_gpu", ctypes.c_bool),  # New in 1.2.3
     ]
+
 
 class RKLLMLoraAdapter(ctypes.Structure):
     _fields_ = [
@@ -64,11 +82,13 @@ class RKLLMLoraAdapter(ctypes.Structure):
         ("scale", ctypes.c_float)
     ]
 
+
 class RKLLMEmbedInput(ctypes.Structure):
     _fields_ = [
         ("embed", ctypes.POINTER(ctypes.c_float)),
         ("n_tokens", ctypes.c_size_t)
     ]
+
 
 class RKLLMTokenInput(ctypes.Structure):
     _fields_ = [
@@ -76,12 +96,18 @@ class RKLLMTokenInput(ctypes.Structure):
         ("n_tokens", ctypes.c_size_t)
     ]
 
+
+# Updated for RKLLM 1.2.3
 class RKLLMMultiModelInput(ctypes.Structure):
     _fields_ = [
         ("prompt", ctypes.c_char_p),
         ("image_embed", ctypes.POINTER(ctypes.c_float)),
-        ("n_image_tokens", ctypes.c_size_t)
+        ("n_image_tokens", ctypes.c_size_t),
+        ("n_image", ctypes.c_size_t),  # New in 1.2.3
+        ("image_width", ctypes.c_size_t),  # New in 1.2.3
+        ("image_height", ctypes.c_size_t)  # New in 1.2.3
     ]
+
 
 class RKLLMInputUnion(ctypes.Union):
     _fields_ = [
@@ -91,16 +117,22 @@ class RKLLMInputUnion(ctypes.Union):
         ("multimodal_input", RKLLMMultiModelInput)
     ]
 
+
+# Updated for RKLLM 1.2.3
 class RKLLMInput(ctypes.Structure):
     _fields_ = [
-        ("input_mode", ctypes.c_int),
+        ("role", ctypes.c_char_p),  # New in 1.2.3
+        ("enable_thinking", ctypes.c_bool),  # New in 1.2.3
+        ("input_type", RKLLMInputType),  # Renamed from input_mode
         ("input_data", RKLLMInputUnion)
     ]
+
 
 class RKLLMLoraParam(ctypes.Structure):
     _fields_ = [
         ("lora_adapter_name", ctypes.c_char_p)
     ]
+
 
 class RKLLMPromptCacheParam(ctypes.Structure):
     _fields_ = [
@@ -108,12 +140,16 @@ class RKLLMPromptCacheParam(ctypes.Structure):
         ("prompt_cache_path", ctypes.c_char_p)
     ]
 
+
+# Updated for RKLLM 1.2.3
 class RKLLMInferParam(ctypes.Structure):
     _fields_ = [
         ("mode", RKLLMInferMode),
         ("lora_params", ctypes.POINTER(RKLLMLoraParam)),
-        ("prompt_cache_params", ctypes.POINTER(RKLLMPromptCacheParam))
+        ("prompt_cache_params", ctypes.POINTER(RKLLMPromptCacheParam)),
+        ("keep_history", ctypes.c_int)  # New in 1.2.3
     ]
+
 
 class RKLLMResultLastHiddenLayer(ctypes.Structure):
     _fields_ = [
@@ -122,9 +158,37 @@ class RKLLMResultLastHiddenLayer(ctypes.Structure):
         ("num_tokens", ctypes.c_int)
     ]
 
+
+# New in RKLLM 1.2.3
+class RKLLMResultLogits(ctypes.Structure):
+    _fields_ = [
+        ("logits", ctypes.POINTER(ctypes.c_float)),
+        ("vocab_size", ctypes.c_int),
+        ("num_tokens", ctypes.c_int)
+    ]
+
+
+# New in RKLLM 1.2.3
+class RKLLMPerfStat(ctypes.Structure):
+    _fields_ = [
+        ("prefill_time_ms", ctypes.c_float),
+        ("prefill_tokens", ctypes.c_int),
+        ("generate_time_ms", ctypes.c_float),
+        ("generate_tokens", ctypes.c_int),
+        ("memory_usage_mb", ctypes.c_float)
+    ]
+
+
+# Updated for RKLLM 1.2.3
 class RKLLMResult(ctypes.Structure):
     _fields_ = [
         ("text", ctypes.c_char_p),
-        ("size", ctypes.c_int),
-        ("last_hidden_layer", RKLLMResultLastHiddenLayer)
+        ("token_id", ctypes.c_int),  # Changed from "size" in 1.1.4
+        ("last_hidden_layer", RKLLMResultLastHiddenLayer),
+        ("logits", RKLLMResultLogits),  # New in 1.2.3
+        ("perf", RKLLMPerfStat)  # New in 1.2.3
     ]
+
+
+# Callback type definition
+callback_type = ctypes.CFUNCTYPE(None, ctypes.POINTER(RKLLMResult), ctypes.c_void_p, ctypes.c_int)
