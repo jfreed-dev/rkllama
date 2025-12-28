@@ -45,11 +45,11 @@ A server to run and interact with LLM models optimized for Rockchip RK3588(S) an
 
 ## Documentation
 
-* French version: [click](./documentation/french.md)
-
-- Client   : [Installation guide](#installation).
-- API REST : [English documentation](./documentation/api/english.md)
-- API REST : [French documentation](./documentation/api/french.md)
+- **[Architecture](ARCHITECTURE.md)** - System diagrams, data flows, and component interactions
+- Client: [Installation guide](#installation)
+- API REST: [English documentation](./documentation/api/english.md)
+- API REST: [French documentation](./documentation/api/french.md)
+- French version: [click](./documentation/french.md)
 
 ## Installation
 
