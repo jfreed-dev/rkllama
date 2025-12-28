@@ -1,3 +1,31 @@
 models/*/*.rkllm
 models/*/*
 src/__pycache__
+
+# AI coding assistants
+CLAUDE.md
+AGENT.md
+AGENTS.md
+GEMINI.md
+CODEX.md
+.claude/
+.gemini/
+.codex/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
