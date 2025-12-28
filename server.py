@@ -79,8 +79,12 @@ def load_model(model_name, huggingface_path=None, system="", temperature=1.0, Fr
     # Change value of model_id with huggingface_path
     variables.model_id = huggingface_path
 
+    # Get MAX_NEW_TOKENS from Modelfile (default: 2048)
+    max_new_tokens = int(os.getenv("MAX_NEW_TOKENS", "2048"))
+    temperature = float(os.getenv("TEMPERATURE", "0.8"))
+
     
-    modele_rkllm = RKLLM(os.path.join(model_dir, from_value))
+    modele_rkllm = RKLLM(os.path.join(model_dir, from_value), max_new_tokens=max_new_tokens, temperature=temperature)
     return modele_rkllm, None
 
 def unload_model():
