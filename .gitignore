@@ -26,6 +26,9 @@ venv/
 *.swp
 *.swo
 
+# Native libraries (versioned)
+lib/*.so.*
+
 # OS
 .DS_Store
 Thumbs.db
