@@ -1,5 +1,5 @@
 Flask==2.3.2
-requests==2.31.0
+requests==2.32.4
 huggingface_hub
 python-dotenv
 transformers
