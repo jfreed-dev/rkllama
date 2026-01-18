@@ -1,5 +1,7 @@
 # RKLLama: LLM Server and Client for Rockchip 3588/3576
 
+> **Fork Notice:** This is a personal fork of [NotPunchnox/rkllama](https://github.com/NotPunchnox/rkllama) for use on my Turing Pi RK1 cluster.
+
 ### [Version: 0.0.4](#New-Version)
 
 Video demo ( version 0.0.1 ):
